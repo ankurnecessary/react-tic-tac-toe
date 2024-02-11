@@ -1,10 +1,24 @@
 import { useState } from "react";
 
-export default function Player({ initialName, symbol, isActive }) {
+export default function Player({
+  initialName,
+  symbol,
+  isActive,
+  onPlayerSave,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(initialName);
 
+  function setPlayerName() {
+    if (isEditing) {
+      onPlayerSave((currentPlayers) => {
+        return { ...currentPlayers, [symbol]: name };
+      });
+    }
+  }
+
   function toggleEdit() {
+    setPlayerName();
     setIsEditing((editing) => !editing);
   }
 
@@ -16,6 +30,7 @@ export default function Player({ initialName, symbol, isActive }) {
     if (event.code == "Enter") {
       setIsEditing((editing) => !editing);
       setName(event.target.value);
+      setPlayerName();
     }
   }
 
