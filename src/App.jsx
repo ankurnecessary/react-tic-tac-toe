@@ -5,38 +5,15 @@ import Log from "./components/Log";
 import { WINNING_COMBINATIONS } from "./components/winning-combinations";
 import GameOver from "./components/GameOver";
 
-const initialGame = [
+const INITIAL_GAME_BOARD = [
   [null, null, null],
   [null, null, null],
   [null, null, null],
 ];
 
-const initialPlayers = { X: "Player 1", O: "Player 2" };
+const PLAYERS = { X: "Player 1", O: "Player 2" };
 
-function deriveActivePlayer(gameTurns) {
-  let activePlayer = "X";
-  if (gameTurns.length > 0 && gameTurns[0].player === "X") {
-    activePlayer = "O";
-  }
-  return activePlayer;
-}
-
-function App() {
-  const [gameTurns, setGameTurns] = useState([]);
-  const [players, setPlayers] = useState(initialPlayers);
-
-  let activePlayer = deriveActivePlayer(gameTurns);
-
-  const gameBoard = [...initialGame.map((row) => [...row])];
-
-  gameTurns.forEach((val) => {
-    const {
-      square: { row, col },
-      player,
-    } = val;
-    gameBoard[row][col] = player;
-  });
-
+function deriveWinner(gameBoard, players) {
   let winner;
   WINNING_COMBINATIONS.some((combination) => {
     const firstSquareSymbol =
@@ -55,6 +32,38 @@ function App() {
       return true;
     }
   });
+  return winner;
+}
+
+function deriveGameBoard(gameTurns) {
+  const gameBoard = [...INITIAL_GAME_BOARD.map((row) => [...row])];
+
+  gameTurns.forEach((val) => {
+    const {
+      square: { row, col },
+      player,
+    } = val;
+    gameBoard[row][col] = player;
+  });
+
+  return gameBoard;
+}
+
+function deriveActivePlayer(gameTurns) {
+  let activePlayer = "X";
+  if (gameTurns.length > 0 && gameTurns[0].player === "X") {
+    activePlayer = "O";
+  }
+  return activePlayer;
+}
+
+function App() {
+  const [gameTurns, setGameTurns] = useState([]);
+  const [players, setPlayers] = useState(PLAYERS);
+  const activePlayer = deriveActivePlayer(gameTurns);
+  const gameBoard = deriveGameBoard(gameTurns);
+  const winner = deriveWinner(gameBoard, players);
+  const hasDraw = gameTurns.length === 9 && !winner;
 
   function handleSelectSquare(rowIndex, colIndex) {
     setGameTurns((prevTurns) => {
@@ -72,8 +81,6 @@ function App() {
     });
   }
 
-  let hasDraw = gameTurns.length === 9 && !winner;
-
   function restartHandler() {
     setGameTurns([]);
   }
@@ -83,13 +90,13 @@ function App() {
       <div id="game-container">
         <ol id="players" className="highlight-player">
           <Player
-            initialName={players["X"]}
+            initialName={players.X}
             symbol="X"
             isActive={activePlayer === "X"}
             onPlayerSave={setPlayers}
           />
           <Player
-            initialName={players["O"]}
+            initialName={players.O}
             symbol="O"
             isActive={activePlayer === "O"}
             onPlayerSave={setPlayers}
